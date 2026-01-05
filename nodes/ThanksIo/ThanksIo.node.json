@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-thanks-io",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Development", "Developer Tools"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://dashboard.thanks.io/profile/api"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://docs.thanks.io"
+			}
+		]
+	}
+}
