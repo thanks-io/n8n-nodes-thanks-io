@@ -20,7 +20,7 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 ## Operations
 
-* Add Recipeint To Mailing List
+* Add Recipient To Mailing List
 
 ## Credentials
 ### API Key
@@ -49,4 +49,4 @@ Tested against n8n version 2.2.1
 
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
 * [thanks.io technical documentation](https://docs.thanks.io)
-* [thanks.io producc documentation](https://help.thanks.io)
+* [thanks.io product documentation](https://help.thanks.io)

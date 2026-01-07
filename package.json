@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "description": "thanks.io n8n nodes",
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://www.thanks.io",
   "keywords": ["n8n-community-node-package"],
-  "author": { "name": "thanks.io", "email": "tech@thanks.io" },
+  "author": { "name": "Walter Dearing", "email": "tech@thanks.io" },
   "repository": {
     "type": "git",
     "url": "https://github.com/thanks-io/n8n-nodes-thanks-io.git"
@@ -24,7 +24,6 @@
     "n8nNodesApiVersion": 1,
     "strict": true,
     "credentials": [
-      "dist/credentials/ThanksIoOAuth2Api.credentials.js",
       "dist/credentials/ThanksIoApi.credentials.js"
     ],
     "nodes": ["dist/nodes/ThanksIo/ThanksIo.node.js"]

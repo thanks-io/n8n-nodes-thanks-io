@@ -34,7 +34,7 @@ export class ThanksIoApi implements ICredentialType {
 	// Basic credential test that hits a protected endpoint
 	test = {
 		request: {
-			baseURL: 'https://api.thanks.io/api/v2/ping',
+			url: 'https://api.thanks.io/api/v2/ping',
 			method: 'GET' as IHttpRequestMethods,
 		},
 	};

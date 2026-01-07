@@ -4,9 +4,13 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	ILoadOptionsFunctions,
+	INodeListSearchResult,
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 import { thanksIoApiRequest } from './GenericFunctions';
+import { getCountryOptions } from './utils';
+
 
 export class ThanksIo implements INodeType {
 	description: INodeTypeDescription = {
@@ -40,6 +44,7 @@ export class ThanksIo implements INodeType {
 				],
 				default: 'apiKey',
 			},
+			// Resource
 			{
 				displayName: 'Resource',
 				name: 'resource',
@@ -63,8 +68,12 @@ export class ThanksIo implements INodeType {
 					},
 				},
 				options: [
-					{ name: 'Create', value: 'create', action: 'Create recipient' },
-					{ name: 'Get', value: 'get', action: 'Get recipient' },
+					{
+						name: 'Create',
+						value: 'create',
+						action: 'Create recipient',
+						description: 'Add recipient to mailing list',
+					},
 				],
 				default: 'create',
 			},
@@ -73,25 +82,63 @@ export class ThanksIo implements INodeType {
 			{
 				displayName: 'Mailing List ID',
 				name: 'mailing_list_id',
-				type: 'number',
+				type: 'resourceLocator',
+				default: { mode: 'list', value: '' },
 				required: true,
-				default: 1,
-				description: 'ID of the mailing list to add the recipient to',
+				modes: [
+					{
+						displayName: 'From List',
+						name: 'list',
+						type: 'list',
+						placeholder: 'Select a Mailing List...',
+						typeOptions: {
+							searchListMethod: 'searchMailingLists',
+							searchable: true,
+						},
+					},
+					{
+						displayName: 'ID',
+						name: 'id',
+						type: 'string',
+						placeholder: 'e.g. 12345',
+						validation: [
+							{
+								type: 'regex',
+								properties: {
+									regex: '[0-9]{1,}',
+									errorMessage: 'Not a valid Mailing List ID',
+								},
+							},
+						],
+						url: '=https://dashboard.thanks.io/mailing_lists/{{$value}}',
+					},
+				],
 				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
+				description: 'ID of the mailing list to add the recipient to',
 			},
 			{
 				displayName: 'Name',
 				name: 'name',
 				type: 'string',
 				default: '',
+				placeholder: '',
 				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
 			},
 			{
-				displayName: 'Address',
+				displayName: 'Street Address',
 				name: 'address',
 				type: 'string',
 				default: '',
-				description: 'Street address',
+				placeholder: '7777 Main st',
+				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
+			},
+			{
+				displayName: 'Address 2',
+				name: 'address2',
+				type: 'string',
+				default: '',
+				placeholder: 'Apartment #1',
+				description: 'Address line 2 (e.g. apartment, suite, unit, or building)',
 				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
 			},
 			{
@@ -102,9 +149,10 @@ export class ThanksIo implements INodeType {
 				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
 			},
 			{
-				displayName: 'Province/State',
+				displayName: 'State',
 				name: 'province',
 				type: 'string',
+				description: 'State or Province',
 				default: '',
 				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
 			},
@@ -112,14 +160,17 @@ export class ThanksIo implements INodeType {
 				displayName: 'Postal Code',
 				name: 'postal_code',
 				type: 'string',
+				description: "ZIP or Postal Code",
 				default: '',
 				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
 			},
 			{
 				displayName: 'Country',
 				name: 'country',
-				type: 'string',
-				default: 'US',
+				type: 'options',
+				typeOptions: { searchable: true },
+				options: getCountryOptions(),
+				default: '',
 				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
 			},
 			{
@@ -130,15 +181,14 @@ export class ThanksIo implements INodeType {
 				default: {},
 				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
 				options: [
-					{ displayName: 'Address 2', name: 'address2', type: 'string', default: '' },
-					{ displayName: 'Company', name: 'company', type: 'string', default: '' },
-					{ displayName: 'Custom 1', name: 'custom1', type: 'string', default: '' },
-					{ displayName: 'Custom 2', name: 'custom2', type: 'string', default: '' },
-					{ displayName: 'Custom 3', name: 'custom3', type: 'string', default: '' },
-					{ displayName: 'Custom 4', name: 'custom4', type: 'string', default: '' },
-					{ displayName: 'DOB', name: 'dob', type: 'string', default: '' },
+					{ displayName: 'Company (or Spouse)', name: 'company', type: 'string', default: '' },
+					{ displayName: 'Custom 1', name: 'custom1', type: 'string', default: '', description: 'Custom info about the recipient like order ID or customer ID' },
+					{ displayName: 'Custom 2', name: 'custom2', type: 'string', default: '', description: 'Custom info about the recipient like order ID or customer ID'  },
+					{ displayName: 'Custom 3', name: 'custom3', type: 'string', default: '', description: 'Custom info about the recipient like order ID or customer ID'  },
+					{ displayName: 'Custom 4', name: 'custom4', type: 'string', default: '', description: 'Custom info about the recipient like order ID or customer ID'  },
+					{ displayName: 'DOB', name: 'dob', type: 'string', default: '', placeholder: 'MM/DD/YYYY', description: 'Date of birth of the recipient' },
 					{ displayName: 'Email', name: 'email', type: 'string', default: '', placeholder: 'name@email.com' },
-					{ displayName: 'Phone', name: 'phone', type: 'string', default: '' },
+					{ displayName: 'Phone', name: 'phone', type: 'string', default: '', description: 'Telephone number of the recipient to create', },
 				],
 			},
 
@@ -154,6 +204,33 @@ export class ThanksIo implements INodeType {
 		],
 	};
 
+	methods = {
+		listSearch: {
+			async searchMailingLists(
+				this: ILoadOptionsFunctions,
+				query?: string,
+			): Promise<INodeListSearchResult> {
+				const searchResults = await thanksIoApiRequest.call(
+					this,
+					'GET',
+					'/mailing-lists',
+					{},
+					{
+						query
+					},
+				);
+
+				return {
+					results: searchResults.data.map((mailing_list) => ({
+						name: mailing_list.description + ' (' + mailing_list.total_recipients + ')',
+						value: mailing_list.id,
+						description: mailing_list.created_at,
+					})),
+				};
+			},
+		},
+	};
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
@@ -164,7 +241,21 @@ export class ThanksIo implements INodeType {
 				if (resource === 'recipient') {
 					const operation = this.getNodeParameter('operation', i) as string;
 					if (operation === 'create') {
-						const mailing_list_id = this.getNodeParameter('mailing_list_id', i) as number;
+						// Handle Resource Locator value for mailing_list_id coming from either list or id mode
+						const mailingListParam = this.getNodeParameter('mailing_list_id', i) as unknown;
+						let mailing_list_id_value: string | number | undefined;
+						if (typeof mailingListParam === 'object' && mailingListParam !== null) {
+							// @ts-expect-error resourceLocator shape has `value`
+							mailing_list_id_value = (mailingListParam as { value?: string | number }).value;
+						} else {
+							mailing_list_id_value = mailingListParam as string | number;
+						}
+
+						const mailing_list_id = Number.parseInt(String(mailing_list_id_value), 10);
+						if (Number.isNaN(mailing_list_id)) {
+							throw new NodeOperationError(this.getNode(), 'Invalid Mailing List ID');
+						}
+						const address2 = this.getNodeParameter('address2', i, '') as string;
 						const name = this.getNodeParameter('name', i, '') as string;
 						const address = this.getNodeParameter('address', i, '') as string;
 						const city = this.getNodeParameter('city', i, '') as string;
@@ -177,6 +268,7 @@ export class ThanksIo implements INodeType {
 							mailing_list_id,
 							name,
 							address,
+							address2,
 							city,
 							province,
 							postal_code,
