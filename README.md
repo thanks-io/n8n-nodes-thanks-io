@@ -1,52 +1,41 @@
 # n8n-nodes-thanks-io
 
-This is an n8n community node. It lets you use thanks.io in your n8n workflows.
+This repository contains the official thanks.io community node for n8n.
 
-thanks.io provides everything you need for direct mail success: AI Realistic Handwritten postcards, letters & notecards, QR tracking, delivery notifcations, automation, and texting all at super competitive pricing.
-
-[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/sustainable-use-license/) workflow automation platform.
-
-[Installation](#installation)
-[Operations](#operations)
-[Credentials](#credentials)
-[Compatibility](#compatibility)
-[Usage](#usage)
-[Resources](#resources)
-[Version history](#version-history)
+[thanks.io](https://www.thanks.io) provides everything you need for direct mail success, including AI-realistic handwritten postcards, letters, and notecards; QR tracking; delivery notifications; and powerful automation— all at super competitive pricing.
 
 ## Installation
 
 Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
-## Operations
-
-* Add Recipient To Mailing List
-
 ## Credentials
-### API Key
-- Generate a Personal Access Token in thanks.io (Dashboard → Settings → API Access) - [https://dashboard.thanks.io/profile/account/billing](https://dashboard.thanks.io/profile/account/billing)
-- In n8n, create a credential "Thanks.io API" and paste your token.
-- Requests will use `Authorization: Bearer <token>`.
 
-Env-based via Credentials Overwrites:
-```bash
-export THANKSIO_API_KEY=shhh
-cat > ~/.config/n8n/credentials-overwrites.json <<'JSON'
-{
-	"thanksIoApi": {
-		"apiKey": "={{ $env.THANKSIO_API_KEY }}"
-	}
-}
-JSON
-export N8N_CREDENTIALS_OVERWRITE_DATA_FILE="$HOME/.config/n8n/credentials-overwrites.json"
-```
+You must have a thanks.io API key to use this node. You can register for a free account and obtain an API key here:
+
+- https://www.thanks.io
+
+Once registered, generate a Personal Access Token in thanks.io:
+
+- Dashboard → Settings → API Access  
+  https://dashboard.thanks.io/profile/api
+
+Then in n8n, create a credential named **“Thanks.io API”** and paste in your token.
+
+## Operations / Usage
+
+- **Add Recipient to Existing Mailing List**  
+  Easily add recipients to a mailing list and trigger thanks.io’s campaign automation. Campaigns can be created and edited in the [thanks.io Dashboard](https://dashboard.thanks.io/).
 
 ## Compatibility
 
-Tested against n8n version 2.2.1
+Tested against n8n version **2.2.1**
 
 ## Resources
 
-* [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
-* [thanks.io technical documentation](https://docs.thanks.io)
-* [thanks.io product documentation](https://help.thanks.io)
+- [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
+- [thanks.io technical documentation](https://docs.thanks.io)
+- [thanks.io product documentation](https://help.thanks.io)
+
+## License
+
+[MIT](https://github.com/thanks-io/n8n-nodes-thanks-io/blob/main/LICENSE.md)
