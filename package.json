@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-thanks-io",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "thanks.io n8n nodes",
   "license": "MIT",
   "homepage": "https://www.thanks.io",
