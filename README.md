@@ -19,12 +19,19 @@ Once registered, generate a Personal Access Token in thanks.io:
 - Dashboard → Settings → API Access  
   https://dashboard.thanks.io/profile/api
 
+![Generate thanks.io Token](images/token-create.png)
+
 Then in n8n, create a credential named **“Thanks.io API”** and paste in your token.
+
+
+![Enter thanks.io Token](images/credentials-setup.png)
 
 ## Operations / Usage
 
-- **Add Recipient to Existing Mailing List**  
+### Add Recipient to Existing Mailing List 
   Easily add recipients to a mailing list and trigger thanks.io’s campaign automation. Campaigns can be created and edited in the [thanks.io Dashboard](https://dashboard.thanks.io/).
+
+![Add Recipient to Existing Mailing Lis](images/new-recipient-setup.png)
 
 ## Compatibility
 
