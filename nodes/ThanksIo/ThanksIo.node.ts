@@ -125,7 +125,7 @@ export class ThanksIo implements INodeType {
 				displayOptions: { show: { resource: ['recipient'], operation: ['create'] } },
 			},
 			{
-				displayName: 'Street Address',
+				displayName: 'Street Address (or Full Address)',
 				name: 'address',
 				type: 'string',
 				default: '',
