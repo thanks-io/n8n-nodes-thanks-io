@@ -1,4 +1,4 @@
-import type { ICredentialType, INodeProperties, IHttpRequestMethods } from 'n8n-workflow';
+import type { IAuthenticateGeneric, ICredentialTestRequest, ICredentialType, INodeProperties, IHttpRequestMethods,  } from 'n8n-workflow';
 
 export class ThanksIoApi implements ICredentialType {
 	name = 'thanksIoApi';
@@ -22,19 +22,20 @@ export class ThanksIoApi implements ICredentialType {
 	];
 
 	// Instruct n8n how to apply the API key to requests (Bearer token)
-		authenticate = {
-			type: 'generic' as const,
-			properties: {
-				headers: {
-					Authorization: '={{ "Bearer " + $credentials.apiKey }}',
-				},
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic' as const,
+		properties: {
+			headers: {
+				Authorization: '={{ "Bearer " + $credentials.apiKey }}',
 			},
-		};
+		},
+	};
 
 	// Basic credential test that hits a protected endpoint
-	test = {
+	test: ICredentialTestRequest = {
 		request: {
-			url: 'https://api.thanks.io/api/v2/ping',
+			baseURL: 'https://api.thanks.io/api/v2',
+			url: '/ping',
 			method: 'GET' as IHttpRequestMethods,
 		},
 	};
