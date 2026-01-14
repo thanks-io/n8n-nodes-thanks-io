@@ -210,7 +210,7 @@ export class ThanksIo implements INodeType {
 				this: ILoadOptionsFunctions,
 				query?: string,
 			): Promise<INodeListSearchResult> {
-				const searchResults = await thanksIoApiRequest.call(
+				const searchResults = (await thanksIoApiRequest.call(
 					this,
 					'GET',
 					'/mailing-lists',
@@ -218,7 +218,14 @@ export class ThanksIo implements INodeType {
 					{
 						query
 					},
-				);
+				)) as {
+					data: Array<{
+						id: number;
+						description: string;
+						total_recipients: number;
+						created_at: string;
+					}>;
+				};
 
 				return {
 					results: searchResults.data.map((mailing_list) => ({
@@ -245,7 +252,6 @@ export class ThanksIo implements INodeType {
 						const mailingListParam = this.getNodeParameter('mailing_list_id', i) as unknown;
 						let mailing_list_id_value: string | number | undefined;
 						if (typeof mailingListParam === 'object' && mailingListParam !== null) {
-							// @ts-expect-error resourceLocator shape has `value`
 							mailing_list_id_value = (mailingListParam as { value?: string | number }).value;
 						} else {
 							mailing_list_id_value = mailingListParam as string | number;

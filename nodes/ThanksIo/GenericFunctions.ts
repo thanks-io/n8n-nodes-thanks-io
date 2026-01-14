@@ -1,14 +1,23 @@
-import type { IExecuteFunctions, IHttpRequestOptions, IDataObject, IHttpRequestMethods } from 'n8n-workflow';
+import type {
+	IExecuteFunctions,
+	ILoadOptionsFunctions,
+	IHttpRequestOptions,
+	IDataObject,
+	IHttpRequestMethods,
+} from 'n8n-workflow';
+
+type ApiRequestContext = IExecuteFunctions | ILoadOptionsFunctions;
 
 export async function thanksIoApiRequest(
-	this: IExecuteFunctions,
+	this: ApiRequestContext,
 	method: string,
 	endpoint: string,
 	body: IDataObject = {},
 	qs: IDataObject = {},
 	optionOverrides: Partial<IHttpRequestOptions> = {},
 ) {
-	const authMethod = this.getNodeParameter('authentication', 0) as string;
+	const authParam = this.getNodeParameter('authentication', 0);
+	const authMethod = String(authParam);
 	const credentialName = authMethod === 'apiKey' ? 'thanksIoApi' : 'thanksIoOAuth2Api';
 	const options: IHttpRequestOptions = {
 		method: method as IHttpRequestMethods,
