@@ -1,11 +1,16 @@
 {
   "name": "n8n-nodes-thanks-io",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "thanks.io n8n nodes",
   "license": "MIT",
   "homepage": "https://www.thanks.io",
-  "keywords": ["n8n-community-node-package"],
-  "author": { "name": "Walter Dearing", "email": "tech@thanks.io" },
+  "keywords": [
+    "n8n-community-node-package"
+  ],
+  "author": {
+    "name": "Walter Dearing",
+    "email": "tech@thanks.io"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/thanks-io/n8n-nodes-thanks-io.git"
@@ -19,14 +24,18 @@
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
     "credentials": [
       "dist/credentials/ThanksIoApi.credentials.js"
     ],
-    "nodes": ["dist/nodes/ThanksIo/ThanksIo.node.js"]
+    "nodes": [
+      "dist/nodes/ThanksIo/ThanksIo.node.js"
+    ]
   },
   "devDependencies": {
     "@n8n/node-cli": "*",
@@ -35,5 +44,7 @@
     "release-it": "^19.0.4",
     "typescript": "5.9.2"
   },
-  "peerDependencies": { "n8n-workflow": "*" }
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
 }
