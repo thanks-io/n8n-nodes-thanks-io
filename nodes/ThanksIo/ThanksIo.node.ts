@@ -283,11 +283,11 @@ export class ThanksIo implements INodeType {
 						};
 
 						const response = await thanksIoApiRequest.call(this, 'POST', '/recipients', body);
-						returnData.push({ json: response as IDataObject });
+						returnData.push({ json: response as IDataObject, pairedItem: { item: i } });
 					} else if (operation === 'get') {
 						const recipientId = this.getNodeParameter('recipientId', i) as number;
 						const response = await thanksIoApiRequest.call(this, 'GET', `/recipients/${recipientId}`);
-						returnData.push({ json: response as IDataObject });
+						returnData.push({ json: response as IDataObject, pairedItem: { item: i } });
 					}
 				}
 			} catch (error) {
