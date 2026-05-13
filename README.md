@@ -109,7 +109,7 @@ Send a folded notecard (greeting card style).
 
 #### Send Windowed Letter
 
-Send a cover letter in a windowed envelope (recipient address shows through window).
+Send a letter in a windowed envelope (recipient address shows through window).
 
 | Field | Description |
 |---|---|
@@ -121,7 +121,7 @@ Send a cover letter in a windowed envelope (recipient address shows through wind
 
 #### Send Windowless Letter
 
-Send a cover letter in a standard windowless envelope.
+Send a letter in a standard windowless envelope.
 
 | Field | Description |
 |---|---|
