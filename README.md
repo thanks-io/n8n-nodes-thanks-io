@@ -93,6 +93,16 @@ Send a 4×6, 6×9, or 6×11 postcard.
 | Use Custom Background | Replace the default background with a custom image |
 | Custom Background Image URL | URL to the custom background image |
 
+Each size is its own mailer type: a 4×6 postcard is a `postcard` order, a 6×9 a `postcard6x9` order, and a 6×11 a `postcard6x11` order. That type is what comes back on the order and its webhooks, and it decides which templates and images fit:
+
+| Size | Order / template type | Front image and custom background |
+|---|---|---|
+| `4x6` | `postcard` | 1875 × 1275 px |
+| `6x9` | `postcard6x9` | 2738 × 1838 px |
+| `6x11` | `postcard6x11` | 3337 × 1777 px |
+
+Use an image template and message template of the matching type. A 6×9 send also accepts a `postcard` template.
+
 ---
 
 #### Send Notecard

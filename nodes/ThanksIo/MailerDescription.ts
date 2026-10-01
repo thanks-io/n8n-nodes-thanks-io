@@ -263,7 +263,7 @@ const creativeFields: INodeProperties[] = [
 		typeOptions: { minValue: 0 },
 		displayOptions: { show: { resource: [MAILER], operation: ALL_OPS } },
 		description:
-			'ID of the image template to use for the front (or background, for letters). Required if Front Image URL is not specified. Use 0 to omit.',
+			'ID of the image template to use for the front (or background, for letters). Required if Front Image URL is not specified. Use 0 to omit. For postcards, use a template of the type matching the selected size: postcard for 4x6, postcard6x9 for 6x9, postcard6x11 for 6x11 (a 6x9 send also accepts a postcard template).',
 	},
 	{
 		displayName: 'Front Image URL',
@@ -273,7 +273,7 @@ const creativeFields: INodeProperties[] = [
 		placeholder: 'https://example.com/image.png',
 		displayOptions: { show: { resource: [MAILER], operation: ALL_OPS } },
 		description:
-			'URL to the image to use for the front of the mailer (or background for letters). Required if Image Template ID is not specified.',
+			'URL to the image to use for the front of the mailer (or background for letters). Required if Image Template ID is not specified. For postcards the image must be 1875x1275 px (4x6), 2738x1838 px (6x9), or 3337x1777 px (6x11).',
 	},
 	{
 		displayName: 'Message',
@@ -292,7 +292,8 @@ const creativeFields: INodeProperties[] = [
 		default: 0,
 		typeOptions: { minValue: 0 },
 		displayOptions: { show: { resource: [MAILER], operation: ALL_OPS } },
-		description: 'ID of the message template to use. Use 0 to omit.',
+		description:
+			'ID of the message template to use. Use 0 to omit. For postcards, use a template of the type matching the selected size: postcard for 4x6, postcard6x9 for 6x9, postcard6x11 for 6x11 (a 6x9 send also accepts a postcard template).',
 	},
 
 	// Postcard-only
@@ -307,7 +308,8 @@ const creativeFields: INodeProperties[] = [
 			{ name: '6x11', value: '6x11' },
 		],
 		displayOptions: { show: { resource: [MAILER], operation: ['sendPostcard'] } },
-		description: 'Size of the postcard',
+		description:
+			'Size of the postcard. A 6x9 postcard is placed as a postcard6x9 order and a 6x11 postcard as a postcard6x11 order.',
 	},
 
 	// QR code (postcards, notecards, letters)
@@ -338,7 +340,8 @@ const creativeFields: INodeProperties[] = [
 		default: '',
 		placeholder: 'https://example.com/background.png',
 		displayOptions: { show: { resource: [MAILER], operation: HAS_BACKGROUND } },
-		description: 'URL to a custom background image placed behind the handwritten message',
+		description:
+			'URL to a custom background image placed behind the handwritten message. For postcards the image must be 1875x1275 px (4x6), 2738x1838 px (6x9), or 3337x1777 px (6x11).',
 	},
 
 	// Letter-only
