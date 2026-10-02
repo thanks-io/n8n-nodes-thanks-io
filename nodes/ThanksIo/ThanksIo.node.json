@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-thanks-io",
+	"node": "n8n-nodes-thanks-io.thanksIo",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Development", "Marketing & Content", "Sales", "Communication"],
