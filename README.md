@@ -56,8 +56,9 @@ Send physical mail pieces to recipients. All mailer operations share common fiel
 | Field | Description |
 |---|---|
 | **Audience** | How recipients are targeted: *Mailing Lists*, *Recipients* (inline), or *Radius Search* (buy a nearby list) |
+| **Creative** | A complete creative from your Creatives library, picked from a list or entered by ID, sent exactly as saved (design, message, handwriting and background). Leave the image, message, background and handwriting fields empty when you use one; the API rejects a send that combines them. QR Code URL and Additional Pages URL can still be added. |
 | **Image Template ID** | ID of a saved image template for the front/background. Use `0` to omit. |
-| **Front Image URL** | Public URL to a front image (JPEG/PNG). Required if no Image Template ID is set. |
+| **Front Image URL** | Public URL to a front image (JPEG/PNG). Required if neither Image Template ID nor Creative is set. |
 | **Message** | Handwritten message text. Supports personalization tokens like `%FIRST_NAME%`. |
 | **Message Template ID** | ID of a saved message template. Use `0` to omit. |
 

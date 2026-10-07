@@ -256,6 +256,43 @@ const IS_LETTER = ['sendLetter', 'sendWindowlessLetter'];
 
 const creativeFields: INodeProperties[] = [
 	{
+		displayName: 'Creative',
+		name: 'creative_id',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a Creative...',
+				typeOptions: {
+					searchListMethod: 'searchCreatives',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'e.g. 12345',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '[0-9]{1,}',
+							errorMessage: 'Not a valid Creative ID',
+						},
+					},
+				],
+				url: '=https://dashboard.thanks.io/app/creatives/{{$value}}/edit',
+			},
+		],
+		displayOptions: { show: { resource: [MAILER], operation: ALL_OPS } },
+		description:
+			'A complete creative from your thanks.io Creatives library, sent exactly as saved: its design, message, handwriting and background. Leave Image Template ID, Front Image URL, Message, Message Template ID, the custom background and the handwriting fields empty when you use one; the API rejects a send that combines them. QR Code URL and Additional Pages URL can still be added.',
+	},
+	{
 		displayName: 'Image Template ID',
 		name: 'image_template_id',
 		type: 'number',
@@ -263,7 +300,7 @@ const creativeFields: INodeProperties[] = [
 		typeOptions: { minValue: 0 },
 		displayOptions: { show: { resource: [MAILER], operation: ALL_OPS } },
 		description:
-			'ID of the image template to use for the front (or background, for letters). Required if Front Image URL is not specified. Use 0 to omit. For postcards, use a template of the type matching the selected size: postcard for 4x6, postcard6x9 for 6x9, postcard6x11 for 6x11 (a 6x9 send also accepts a postcard template).',
+			'ID of the image template to use for the front (or background, for letters). Required if neither Front Image URL nor Creative is specified. Use 0 to omit. For postcards, use a template of the type matching the selected size: postcard for 4x6, postcard6x9 for 6x9, postcard6x11 for 6x11 (a 6x9 send also accepts a postcard template).',
 	},
 	{
 		displayName: 'Front Image URL',
@@ -273,7 +310,7 @@ const creativeFields: INodeProperties[] = [
 		placeholder: 'https://example.com/image.png',
 		displayOptions: { show: { resource: [MAILER], operation: ALL_OPS } },
 		description:
-			'URL to the image to use for the front of the mailer (or background for letters). Required if Image Template ID is not specified. For postcards the image must be 1875x1275 px (4x6), 2738x1838 px (6x9), or 3337x1777 px (6x11).',
+			'URL to the image to use for the front of the mailer (or background for letters). Required if neither Image Template ID nor Creative is specified. For postcards the image must be 1875x1275 px (4x6), 2738x1838 px (6x9), or 3337x1777 px (6x11).',
 	},
 	{
 		displayName: 'Message',

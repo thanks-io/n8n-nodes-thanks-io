@@ -13,6 +13,37 @@ import { getCountryOptions } from './utils';
 import { mailerOperations, mailerFields, mailerOperationToEndpoint } from './MailerDescription';
 
 
+const OPERATION_MAILER_TYPES: Record<string, string> = {
+	sendLetter: 'letter',
+	sendWindowlessLetter: 'windowlessletter',
+	sendNotecard: 'notecard',
+	sendGiftcard: 'giftcard',
+	sendMagnacard: 'magnacard',
+};
+
+const POSTCARD_SIZE_MAILER_TYPES: Record<string, string> = {
+	'4x6': 'postcard',
+	'6x9': 'postcard6x9',
+	'6x11': 'postcard6x11',
+};
+
+/**
+ * The mailer type the operation being edited sends, so the creative list only offers
+ * creatives the send will accept. Undefined (list everything) when it can't be read.
+ */
+function creativeMailerType(context: ILoadOptionsFunctions): string | undefined {
+	try {
+		const operation = context.getCurrentNodeParameter('operation') as string | undefined;
+		if (operation === 'sendPostcard') {
+			const size = (context.getCurrentNodeParameter('size') as string | undefined) ?? '4x6';
+			return POSTCARD_SIZE_MAILER_TYPES[size];
+		}
+		return operation ? OPERATION_MAILER_TYPES[operation] : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
 export class ThanksIo implements INodeType {
 	description: INodeTypeDescription = {
 		usableAsTool: true,
@@ -242,6 +273,34 @@ export class ThanksIo implements INodeType {
 				};
 			},
 
+			async searchCreatives(
+				this: ILoadOptionsFunctions,
+				query?: string,
+			): Promise<INodeListSearchResult> {
+				const qs: IDataObject = { complete_only: 1 };
+				if (query) qs.search = query;
+				const mailerType = creativeMailerType(this);
+				if (mailerType) qs.mailer_type = mailerType;
+
+				const searchResults = (await thanksIoApiRequest.call(this, 'GET', '/creatives', {}, qs)) as {
+					data: Array<{
+						id: number;
+						name: string | null;
+						mailer_type: string | null;
+						postcard_size: string | null;
+					}>;
+				};
+
+				return {
+					results: searchResults.data.map((creative) => ({
+						name: (creative.name || 'Untitled creative') + ' (#' + creative.id + ')',
+						value: creative.id,
+						description: creative.mailer_type ?? undefined,
+						url: 'https://dashboard.thanks.io/app/creatives/' + creative.id + '/edit',
+					})),
+				};
+			},
+
 			async searchGiftcardBrands(
 				this: ILoadOptionsFunctions,
 				query?: string,
@@ -424,6 +483,19 @@ export class ThanksIo implements INodeType {
 						body[key] = val as IDataObject[string];
 					};
 
+					const creativeRaw = this.getNodeParameter('creative_id', i, '') as
+						| { value?: string | number }
+						| string
+						| number;
+					const creativeId =
+						typeof creativeRaw === 'object' && creativeRaw !== null ? creativeRaw.value : creativeRaw;
+					if (creativeId !== undefined && creativeId !== '') {
+						const parsedCreativeId = Number(creativeId);
+						if (!Number.isInteger(parsedCreativeId) || parsedCreativeId <= 0) {
+							throw new NodeOperationError(this.getNode(), 'Creative must be a creative ID number', { itemIndex: i });
+						}
+						body.creative_id = parsedCreativeId;
+					}
 					setIfPresent('image_template_id', this.getNodeParameter('image_template_id', i, 0));
 					setIfPresent('front_image_url', this.getNodeParameter('front_image_url', i, ''));
 					const message = this.getNodeParameter('message', i, '') as string;
