@@ -2,7 +2,7 @@
 
 This repository contains the official thanks.io community node for n8n.
 
-[thanks.io](https://www.thanks.io) provides everything you need for direct mail success, including AI-realistic handwritten postcards, letters, and notecards; QR tracking; delivery notifications; and powerful automation— all at super competitive pricing.
+[thanks.io](https://thanks.io) provides everything you need for direct mail success, including AI-realistic handwritten postcards, letters, and notecards; QR tracking; delivery notifications; and powerful automation— all at super competitive pricing.
 
 ## Installation
 
@@ -12,7 +12,7 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 You must have a thanks.io API key to use this node. You can register for a free account and obtain an API key here:
 
-- https://www.thanks.io
+- https://thanks.io
 
 Once registered, generate a Personal Access Token in thanks.io:
 
