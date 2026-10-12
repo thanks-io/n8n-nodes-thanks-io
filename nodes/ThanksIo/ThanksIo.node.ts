@@ -28,6 +28,23 @@ const POSTCARD_SIZE_MAILER_TYPES: Record<string, string> = {
 };
 
 /**
+ * Fields a creative supplies itself, keyed by request field, valued by display name. The API
+ * rejects a send that sets any of them alongside creative_id (CreativeSendResolver::REPLACED_INPUTS).
+ */
+const CREATIVE_REPLACED_FIELDS: Record<string, string> = {
+	image_template_id: 'Image Template ID',
+	front_image_url: 'Front Image URL',
+	message: 'Message',
+	message_template_id: 'Message Template ID',
+	use_custom_background: 'Use Custom Background',
+	custom_background_image: 'Custom Background Image URL',
+	pdf_only_url: 'PDF Only URL',
+	handwriting_style_id: 'Handwriting Style ID',
+	handwriting_color: 'Handwriting Color',
+	handwriting_realism: 'Handwriting Realism',
+};
+
+/**
  * The mailer type the operation being edited sends, so the creative list only offers
  * creatives the send will accept. Undefined (list everything) when it can't be read.
  */
@@ -276,9 +293,11 @@ export class ThanksIo implements INodeType {
 			async searchCreatives(
 				this: ILoadOptionsFunctions,
 				query?: string,
+				paginationToken?: string,
 			): Promise<INodeListSearchResult> {
 				const qs: IDataObject = { complete_only: 1 };
 				if (query) qs.search = query;
+				if (paginationToken) qs.page = paginationToken;
 				const mailerType = creativeMailerType(this);
 				if (mailerType) qs.mailer_type = mailerType;
 
@@ -289,9 +308,13 @@ export class ThanksIo implements INodeType {
 						mailer_type: string | null;
 						postcard_size: string | null;
 					}>;
+					meta?: { current_page: number; last_page: number };
 				};
 
+				const meta = searchResults.meta;
 				return {
+					paginationToken:
+						meta && meta.current_page < meta.last_page ? String(meta.current_page + 1) : undefined,
 					results: searchResults.data.map((creative) => ({
 						name: (creative.name || 'Untitled creative') + ' (#' + creative.id + ')',
 						value: creative.id,
@@ -483,13 +506,12 @@ export class ThanksIo implements INodeType {
 						body[key] = val as IDataObject[string];
 					};
 
-					const creativeRaw = this.getNodeParameter('creative_id', i, '') as
-						| { value?: string | number }
+					const creativeId = this.getNodeParameter('creative_id', i, '', { extractValue: true }) as
 						| string
-						| number;
-					const creativeId =
-						typeof creativeRaw === 'object' && creativeRaw !== null ? creativeRaw.value : creativeRaw;
-					if (creativeId !== undefined && creativeId !== '') {
+						| number
+						| null
+						| undefined;
+					if (creativeId !== undefined && creativeId !== null && String(creativeId).trim() !== '') {
 						const parsedCreativeId = Number(creativeId);
 						if (!Number.isInteger(parsedCreativeId) || parsedCreativeId <= 0) {
 							throw new NodeOperationError(this.getNode(), 'Creative must be a creative ID number', { itemIndex: i });
@@ -550,6 +572,26 @@ export class ThanksIo implements INodeType {
 						if (v === '' || v === undefined || v === null) continue;
 						if (typeof v === 'number' && v === 0 && (k === 'handwriting_style_id' || k === 'sub_account')) continue;
 						body[k] = v as IDataObject[string];
+					}
+
+					if (body.creative_id !== undefined) {
+						// Realism switched off asks for nothing the creative doesn't already decide, but the
+						// API counts any value as set. Without a creative it stays, to override an account default.
+						if (body.handwriting_realism === false) delete body.handwriting_realism;
+						const combined = Object.keys(CREATIVE_REPLACED_FIELDS)
+							.filter((key) => body[key] !== undefined)
+							.map((key) => CREATIVE_REPLACED_FIELDS[key]);
+						if (combined.length > 0) {
+							throw new NodeOperationError(
+								this.getNode(),
+								`Creative cannot be combined with ${combined.join(', ')}`,
+								{
+									itemIndex: i,
+									description:
+										'A creative sends exactly as saved: its design, message, handwriting and background come from the creative. Clear these fields, or clear Creative. QR Code URL and Additional Pages URL can still be added.',
+								},
+							);
+						}
 					}
 
 					const response = await thanksIoApiRequest.call(this, 'POST', endpoint, body);
