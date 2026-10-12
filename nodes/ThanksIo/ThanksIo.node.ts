@@ -10,22 +10,34 @@ import type {
 import { NodeOperationError, NodeConnectionTypes } from 'n8n-workflow';
 import { thanksIoApiRequest } from './GenericFunctions';
 import { getCountryOptions } from './utils';
-import { mailerOperations, mailerFields, mailerOperationToEndpoint } from './MailerDescription';
+import {
+	mailerOperations,
+	mailerFields,
+	mailerOperationToEndpoint,
+	postcardSizeMailerTypes,
+} from './MailerDescription';
 
 
-const OPERATION_MAILER_TYPES: Record<string, string> = {
-	sendLetter: 'letter',
-	sendWindowlessLetter: 'windowlessletter',
-	sendNotecard: 'notecard',
-	sendGiftcard: 'giftcard',
-	sendMagnacard: 'magnacard',
+const CREATIVE_TYPE_LABELS: Record<string, string> = {
+	postcard: 'Postcard 4x6',
+	postcard6x9: 'Postcard 6x9',
+	postcard6x11: 'Postcard 6x11',
+	letter: 'Letter',
+	windowlessletter: 'Windowless Letter',
+	notecard: 'Notecard',
+	giftcard: 'Gift Card',
+	magnacard: 'Magnacard',
 };
 
-const POSTCARD_SIZE_MAILER_TYPES: Record<string, string> = {
-	'4x6': 'postcard',
-	'6x9': 'postcard6x9',
-	'6x11': 'postcard6x11',
-};
+/**
+ * The creative's mailer type as the picker shows it. The API reports a 6x9 as postcard6x9, but a
+ * postcard can still carry its size separately, so that size wins over the 4x6 default label.
+ */
+function creativeTypeLabel(mailerType: string | null, postcardSize: string | null): string | undefined {
+	if (!mailerType) return undefined;
+	if (mailerType === 'postcard' && postcardSize) return 'Postcard ' + postcardSize;
+	return CREATIVE_TYPE_LABELS[mailerType] ?? mailerType;
+}
 
 /**
  * Fields a creative supplies itself, keyed by request field, valued by display name. The API
@@ -42,6 +54,8 @@ const CREATIVE_REPLACED_FIELDS: Record<string, string> = {
 	handwriting_style_id: 'Handwriting Style ID',
 	handwriting_color: 'Handwriting Color',
 	handwriting_realism: 'Handwriting Realism',
+	giftcard_brand: 'Giftcard Brand',
+	giftcard_amount_in_cents: 'Giftcard Amount',
 };
 
 /**
@@ -53,9 +67,10 @@ function creativeMailerType(context: ILoadOptionsFunctions): string | undefined 
 		const operation = context.getCurrentNodeParameter('operation') as string | undefined;
 		if (operation === 'sendPostcard') {
 			const size = (context.getCurrentNodeParameter('size') as string | undefined) ?? '4x6';
-			return POSTCARD_SIZE_MAILER_TYPES[size];
+			return postcardSizeMailerTypes[size];
 		}
-		return operation ? OPERATION_MAILER_TYPES[operation] : undefined;
+		// Every other operation sends the mailer type its endpoint is named for (/send/letter → letter).
+		return operation ? mailerOperationToEndpoint[operation]?.replace('/send/', '') : undefined;
 	} catch {
 		return undefined;
 	}
@@ -159,7 +174,7 @@ export class ThanksIo implements INodeType {
 							{
 								type: 'regex',
 								properties: {
-									regex: '[0-9]{1,}',
+									regex: '^[0-9]+$',
 									errorMessage: 'Not a valid Mailing List ID',
 								},
 							},
@@ -318,7 +333,7 @@ export class ThanksIo implements INodeType {
 					results: searchResults.data.map((creative) => ({
 						name: (creative.name || 'Untitled creative') + ' (#' + creative.id + ')',
 						value: creative.id,
-						description: creative.mailer_type ?? undefined,
+						description: creativeTypeLabel(creative.mailer_type, creative.postcard_size),
 						url: 'https://dashboard.thanks.io/app/creatives/' + creative.id + '/edit',
 					})),
 				};
@@ -362,13 +377,9 @@ export class ThanksIo implements INodeType {
 				this: ILoadOptionsFunctions,
 			): Promise<INodeListSearchResult> {
 				// Resolve selected brand code from the resourceLocator parameter
-				const brandParam = this.getNodeParameter('giftcard_brand', 0) as
-					| { value?: string }
-					| string;
-				const brandCode =
-					typeof brandParam === 'object' && brandParam !== null
-						? (brandParam.value ?? '')
-						: String(brandParam ?? '');
+				const brandCode = String(
+					this.getNodeParameter('giftcard_brand', '', { extractValue: true }) ?? '',
+				);
 
 				const result = (await thanksIoApiRequest.call(
 					this,
@@ -544,24 +555,14 @@ export class ThanksIo implements INodeType {
 					}
 
 					if (operation === 'sendGiftcard') {
-						const brandRaw = this.getNodeParameter('giftcard_brand', i, {}) as
-							| { value?: string }
-							| string;
-						const brandCode =
-							typeof brandRaw === 'object' && brandRaw !== null
-								? (brandRaw.value ?? '')
-								: String(brandRaw ?? '');
+						const brandCode = String(
+							this.getNodeParameter('giftcard_brand', i, '', { extractValue: true }) ?? '',
+						);
 						if (brandCode) body.giftcard_brand = brandCode;
 
-						const amountRaw = this.getNodeParameter('giftcard_amount_in_cents', i, {}) as
-							| { value?: string | number }
-							| string
-							| number;
-						const amountVal =
-							typeof amountRaw === 'object' && amountRaw !== null
-								? amountRaw.value
-								: amountRaw;
-						const amountCents = Number(amountVal);
+						const amountCents = Number(
+							this.getNodeParameter('giftcard_amount_in_cents', i, '', { extractValue: true }),
+						);
 						if (!Number.isNaN(amountCents) && amountCents > 0) {
 							body.giftcard_amount_in_cents = amountCents;
 						}
@@ -588,7 +589,7 @@ export class ThanksIo implements INodeType {
 								{
 									itemIndex: i,
 									description:
-										'A creative sends exactly as saved: its design, message, handwriting and background come from the creative. Clear these fields, or clear Creative. QR Code URL and Additional Pages URL can still be added.',
+										'A creative sends exactly as saved: its design, message, handwriting and background, and a gift card creative\'s brand and amount, come from the creative. Clear these fields, or clear Creative. QR Code URL and Additional Pages URL can still be added.',
 								},
 							);
 						}

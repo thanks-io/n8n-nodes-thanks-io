@@ -139,7 +139,7 @@ const audienceFields: INodeProperties[] = [
 									{
 										type: 'regex',
 										properties: {
-											regex: '[0-9]{1,}',
+											regex: '^[0-9]+$',
 											errorMessage: 'Not a valid Mailing List ID',
 										},
 									},
@@ -280,7 +280,7 @@ const creativeFields: INodeProperties[] = [
 					{
 						type: 'regex',
 						properties: {
-							regex: '[0-9]{1,}',
+							regex: '^[0-9]+$',
 							errorMessage: 'Not a valid Creative ID',
 						},
 					},
@@ -407,7 +407,7 @@ const creativeFields: INodeProperties[] = [
 		type: 'resourceLocator',
 		default: { mode: 'list', value: '' },
 		displayOptions: { show: { resource: [MAILER], operation: ['sendGiftcard'] } },
-		description: 'Brand of giftcard to send',
+		description: 'Brand of giftcard to send. Leave empty when a Creative is set: a gift card creative carries its own brand.',
 		modes: [
 			{
 				displayName: 'From List',
@@ -433,7 +433,7 @@ const creativeFields: INodeProperties[] = [
 		type: 'resourceLocator',
 		default: { mode: 'list', value: '' },
 		displayOptions: { show: { resource: [MAILER], operation: ['sendGiftcard'] } },
-		description: 'Amount of the giftcard. Available amounts depend on the selected brand.',
+		description: 'Amount of the giftcard. Available amounts depend on the selected brand. Leave empty when a Creative is set: a gift card creative carries its own amount.',
 		modes: [
 			{
 				displayName: 'From List',
@@ -532,6 +532,13 @@ export const mailerFields: INodeProperties[] = [
 	...creativeFields,
 	...additionalFields,
 ];
+
+/** The mailer type each Size option sends as, matching the size field's description. */
+export const postcardSizeMailerTypes: Record<string, string> = {
+	'4x6': 'postcard',
+	'6x9': 'postcard6x9',
+	'6x11': 'postcard6x11',
+};
 
 export const mailerOperationToEndpoint: Record<string, string> = {
 	sendPostcard: '/send/postcard',
